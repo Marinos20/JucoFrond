@@ -85,25 +85,31 @@ export const ContactPage = () => {
             className="border-b-0 md:border-r-0"
           >
             <div className="space-y-1">
-              <div className="flex items-center gap-x-3">
-                <a
-                  href={`tel:${APP_PHONE}`}
-                  className="block text-base font-bold text-slate-900 text-[1.2rem] hover:text-indigo-600 transition-colors"
-                >
-                  {APP_PHONE}
-                </a>
-                <CopyButton textToCopy={APP_PHONE} />
-              </div>
-              <div className="flex items-center gap-x-3">
-                <a
-                  href={`tel:${APP_PHONE_2}`}
-                  className="block text-base font-bold text-[1.2rem] text-slate-900 hover:text-indigo-600 transition-colors"
-                >
-                  {APP_PHONE_2}
-                </a>
-                <CopyButton textToCopy={APP_PHONE_2} />
-              </div>
-            </div>
+  <div className="flex items-center gap-x-3">
+    <a
+      href="https://wa.me/34695970359"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block text-base font-bold text-slate-900 text-[1.2rem] hover:text-green-600 transition-colors"
+    >
+      {APP_PHONE}
+    </a>
+    <CopyButton textToCopy={APP_PHONE} />
+  </div>
+
+  <div className="flex items-center gap-x-3">
+    <a
+      href="https://wa.me/33748544126"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block text-base font-bold text-[1.2rem] text-slate-900 hover:text-green-600 transition-colors"
+    >
+      {APP_PHONE_2}
+    </a>
+    <CopyButton textToCopy={APP_PHONE_2} />
+  </div>
+</div>
+
           </Box>
         </div>
 

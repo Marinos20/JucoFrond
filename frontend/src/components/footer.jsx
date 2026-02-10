@@ -97,12 +97,20 @@ export const Footer = () => {
                   Union européenne,,<br />Bruxelles, Belgique
                 </p>
               </div>
-              <div className="flex items-center gap-3 group cursor-pointer">
-                <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-indigo-600 group-hover:bg-indigo-50 transition-colors">
-                  <Phone size={18} />
-                </div>
-                <p className="text-sm font-bold text-slate-600">+34 695 97 03 59</p>
-              </div>
+              <a
+  href="https://wa.me/34695970359"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="flex items-center gap-3 group"
+>
+  <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-green-600 group-hover:bg-green-50 transition-colors">
+    <Phone size={18} />
+  </div>
+  <p className="text-sm font-bold text-slate-600 group-hover:text-green-600">
+    +34 695 97 03 59
+  </p>
+</a>
+
               <div className="flex items-center gap-3 group cursor-pointer">
                 <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-indigo-600 group-hover:bg-indigo-50 transition-colors">
                   <Mail size={18} />
