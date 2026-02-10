@@ -17,10 +17,16 @@ export const Cta = () => {
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <button className="h-12 px-8 rounded-full cursor-pointer bg-slate-900 text-white font-medium text-base hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center gap-2">
-            Destiné aux entrepreneurs
-            <ArrowRight className="w-4 h-4" />
-          </button>
+          <a
+  href="https://wa.me/34695970359"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="h-12 px-8 rounded-full bg-slate-900 text-white font-medium text-base hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center gap-2"
+>
+  Destiné aux entrepreneurs
+  <ArrowRight className="w-4 h-4" />
+</a>
+
 
           <a
             href="mailto:direction@eurofinancement.com"
