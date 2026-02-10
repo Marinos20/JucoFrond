@@ -14,9 +14,9 @@ const testimonials = [
     id: 1,
     logo: "UE",
     quote:
-      "Recherchant un financement depuis que j'ai perdu tous mes biens suite à un incendie, personne n'a voulu m'aider à cause de ma situation qui ne remplissait pas les conditions d'octroi d'un crédit. Mais grâce à DIRECT FINANCEMENT, j'ai pu bénéficier d'un don financier et je m'en suis sorti, je suis de nouveau mon propre chef.",
-    name: "Dr. Koffi Mensah",
-    role: "Entrepreuneur",
+      "Recherchant un financement depuis que j'ai perdu tous mes biens suite à un incendie, personne n'a voulu m'aider à cause de ma situation qui ne remplissait pas les conditions d'octroi d'un crédit. Mais grâce à eurofinancement, j'ai pu bénéficier d'un don financier et je m'en suis sorti, je suis de nouveau mon propre chef.",
+    name: "Simon Keller",
+    role: "Bénéficiaire",
     avatar: "https://i.pravatar.cc/150?u=director",
     featured: true,
   },
@@ -24,15 +24,15 @@ const testimonials = [
     id: 2,
     quote:
       "Toutes les transactions sont sécurisées, automatiquement enregistrées et accessibles, ce qui facilite la conformité et la redevabilité.",
-    name: "Mme Amadou",
-    role: "Gestionnaire Financière",
+    name: "Maximilian Muller",
+    role: "Bénéficiaire",
     avatar: "https://i.pravatar.cc/150?u=manager",
   },
   {
     id: 3,
     quote:
       "Rejeté par la banque et totalement désespéré, je me suis tourné vers DIRECT FINANCEMENT qui m'a octrouyé le financement dont j'ai besoin pour sauver ma structure en un temps record. Et le plus étonnant c'est que c'est non remboursable. Merci à toute l'équipe de DIRECT FINANCEMENT.",
-    name: "Marc Houndété",
+    name: "Piotr Kowalski",
     role: "Bénéficiaire",
     avatar: "https://i.pravatar.cc/150?u=parent",
   },
@@ -40,8 +40,8 @@ const testimonials = [
     id: 4,
     quote:
       "J'ai obtenu une subvention pour agrandir mon restaurant qui avant ne pouvait contenir que 8 tables. Maintenant j'ai beaucoup d'espace et depuis mon chiffre d'affaire a bien augmenté. je peux m'offrir des vacances à moi et à ma famille. Merci à vous.",
-    name: "Sophie Lawson",
-    role: "Secrétaire Générale",
+    name: "Lorenzo Bianchi",
+    role: "Bénéficiaire",
     avatar: "https://i.pravatar.cc/150?u=admin",
   },
 ];
