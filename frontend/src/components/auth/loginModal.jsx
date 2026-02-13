@@ -280,7 +280,7 @@ export const LoginModal = ({ onBack, onLoginSuccess }) => {
               </div>
               <div className="text-center space-y-2">
                 <h2 className="text-3xl font-bold text-white tracking-tighter">Accès autorisé.</h2>
-                <p className="text-white/40 font-light">Chargement de votre environnement ScolarPay...</p>
+                <p className="text-white/40 font-light">Chargement de votre environnement eurofinancement...</p>
               </div>
             </motion.div>
           )}
