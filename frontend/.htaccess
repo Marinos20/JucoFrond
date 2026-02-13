@@ -1,0 +1,33 @@
+# =========================
+# 🔹 .htaccess pour React SPA
+# =========================
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Ignorer les fichiers et dossiers réels
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+
+  # Rediriger tout le reste vers index.html
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# =========================
+# 🔹 Sécurité & bonnes pratiques
+# =========================
+
+# Empêcher la navigation dans les dossiers
+Options -Indexes
+
+# Expire headers pour le cache (facultatif mais recommandé)
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html "access plus 0 seconds"
+  ExpiresByType text/css "access plus 1 week"
+  ExpiresByType application/javascript "access plus 1 week"
+  ExpiresByType image/jpeg "access plus 1 month"
+  ExpiresByType image/png "access plus 1 month"
+  ExpiresByType image/svg+xml "access plus 1 month"
+</IfModule>
