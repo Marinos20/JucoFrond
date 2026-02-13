@@ -85,36 +85,41 @@ const handleFetch = async (url, options = {}, isFormData = false) => {
 ========================= */
 export const api = {
   /* ================= AUTH ================= */
-  auth: {
-    login: async (credentials) => {
-      const res = await handleFetch(`${BASE_URL}/auth/login`, {
-        method: "POST",
-        body: JSON.stringify(credentials),
-      });
+auth: {
+  login: async (credentials) => {
+    const res = await handleFetch(`${BASE_URL}/auth/login`, {
+      method: "POST",
+      body: JSON.stringify(credentials),
+    });
 
-      if (res?.token) localStorage.setItem("token", res.token);
-      if (res?.user) localStorage.setItem("user", JSON.stringify(res.user));
+    if (res?.token) localStorage.setItem("token", res.token);
+    if (res?.user) localStorage.setItem("user", JSON.stringify(res.user));
 
-      return res;
-    },
-
-    registerParent: (data) =>
-      handleFetch(`${BASE_URL}/auth/register-parent`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
-
-    resendVerification: (email) =>
-      handleFetch(`${BASE_URL}/auth/resend-verification`, {
-        method: "POST",
-        body: JSON.stringify({ email }),
-      }),
-
-    logout: () => {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-    },
+    return res;
   },
+
+  registerParent: (data) =>
+    handleFetch(`${BASE_URL}/auth/register-parent`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  resendVerification: (email) =>
+    handleFetch(`${BASE_URL}/auth/resend-verification`, {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }),
+
+  /* ✅ AJOUT ICI */
+  verifyParentEmail: (token) =>
+    handleFetch(`${BASE_URL}/auth/verify-parent-email/${token}`),
+
+  logout: () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+  },
+},
+
 
   /* ================= PARENT ================= */
   parent: {

@@ -18,6 +18,7 @@ import { Features } from "./components/features";
 import Faq from "./components/faq";
 import { ContactPage } from "./components/contactPage";
 import { NotFound } from "./components/NotFound";
+import VerifyParentEmail from "./components/pages/VerifyParentEmail";
 
 
 import { api } from "./services/api";
@@ -26,7 +27,7 @@ const App = () => {
   const [scrolled, setScrolled] = useState(false);
   const [view, setView] = useState("landing");
   const [currentUser, setCurrentUser] = useState(null);
-  const [profileStatus, setProfileStatus] = useState(null); // null | true | false
+  const [profileStatus, setProfileStatus] = useState(null);
 
   const dashboardRole = useMemo(
     () => currentUser?.role || null,
@@ -51,6 +52,16 @@ const App = () => {
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  /* =========================
+     CHECK URL POUR VERIFY EMAIL
+  ========================= */
+  const path = window.location.pathname;
+
+  if (path.startsWith("/verify-parent-email/")) {
+    const token = path.split("/verify-parent-email/")[1];
+    return <VerifyParentEmail token={token} />;
+  }
 
   /* =========================
      CHECK PARENT PROFILE STATUS
@@ -102,7 +113,6 @@ const App = () => {
   }
 
   if (dashboardRole === "parent") {
-    // ⏳ Chargement
     if (profileStatus === null) {
       return (
         <div className="h-screen flex items-center justify-center">
@@ -111,13 +121,12 @@ const App = () => {
       );
     }
 
-    // ❌ PROFIL INCOMPLET → ONBOARDING AVEC LAYOUT
     if (profileStatus === false) {
       return (
         <DashboardLayout
           userInitial={currentUser?.first_name?.[0] || "P"}
           userRoleLabel="Parent · Profil incomplet"
-          sidebarItems={[]} // menu volontairement vide
+          sidebarItems={[]}
           onLogout={handleLogout}
         >
           <ProfileCompletionPage
@@ -127,7 +136,6 @@ const App = () => {
       );
     }
 
-    // ✅ PROFIL OK → DASHBOARD
     return (
       <ProjectSubmissionDashboard
         user={currentUser}
@@ -148,30 +156,26 @@ const App = () => {
     );
   }
 
-
-
-
+  /* =========================
+     FALLBACK 404 LOGIQUE
+  ========================= */
+  if (!["landing", "login"].includes(view)) {
+    return <NotFound onBack={() => setView("landing")} />;
+  }
 
   /* =========================
-   FALLBACK VIEW (404 LOGIQUE)
-========================= */
-if (!["landing", "login"].includes(view)) {
-  return <NotFound onBack={() => setView("landing")} />;
-}
-
-
-  /* =========================
-     LANDING
+     LANDING PAGE
   ========================= */
   return (
     <div className="min-h-screen bg-white text-slate-950 font-sans selection:bg-slate-900 selection:text-white">
       <Header scrolled={scrolled} onLoginClick={() => setView("login")} />
-<main>
-  <Hero onLoginClick={() => setView("login")} />
-  <Features id="features" />
-  <TestimonialsCarousel />
-  <Faq />
-</main>
+
+      <main>
+        <Hero onLoginClick={() => setView("login")} />
+        <Features id="features" />
+        <TestimonialsCarousel />
+        <Faq />
+      </main>
 
       <Cta id="solution" />
       <ContactPage id="contact" />

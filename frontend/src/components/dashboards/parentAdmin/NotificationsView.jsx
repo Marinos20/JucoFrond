@@ -48,7 +48,6 @@ const safeJson = (val, fallback) => {
   return fallback;
 };
 
-// ✅ normalise 0/1 true/false "0"/"1"
 const isRead = (v) => v === 1 || v === true || v === "1";
 
 const TYPE_META = {
@@ -107,7 +106,7 @@ const extractActionUrl = (n) => {
 
 // ---------- Component ----------
 export const NotificationsView = ({ onUnreadCountChange }) => {
-  const [tab, setTab] = useState("all"); // all | unread
+  const [tab, setTab] = useState("all");
   const [loading, setLoading] = useState(true);
   const [marking, setMarking] = useState(false);
   const [items, setItems] = useState([]);
@@ -122,9 +121,7 @@ export const NotificationsView = ({ onUnreadCountChange }) => {
 
       const normalized = list.map((n) => ({
         ...n,
-        // payload peut être json string ou objet
         payload: safeJson(n.payload, n.payload),
-        // is_read normalisé pour l’UI
         is_read: isRead(n.is_read) ? 1 : 0,
       }));
 
@@ -142,11 +139,9 @@ export const NotificationsView = ({ onUnreadCountChange }) => {
   }, []);
 
   const unreadCount = useMemo(() => {
-    if (!Array.isArray(items)) return 0;
     return items.filter((n) => !isRead(n.is_read)).length;
   }, [items]);
 
-  // ✅ remonte le compteur au dashboard (badge sidebar)
   useEffect(() => {
     if (typeof onUnreadCountChange === "function") {
       onUnreadCountChange(unreadCount);
@@ -154,9 +149,8 @@ export const NotificationsView = ({ onUnreadCountChange }) => {
   }, [unreadCount, onUnreadCountChange]);
 
   const filtered = useMemo(() => {
-    const base = Array.isArray(items) ? items : [];
-    if (tab === "unread") return base.filter((n) => !isRead(n.is_read));
-    return base;
+    if (tab === "unread") return items.filter((n) => !isRead(n.is_read));
+    return items;
   }, [items, tab]);
 
   const markAllRead = async () => {
@@ -172,11 +166,15 @@ export const NotificationsView = ({ onUnreadCountChange }) => {
   };
 
   const markOneRead = async (id) => {
-    setItems((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: 1 } : n)));
+    setItems((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, is_read: 1 } : n))
+    );
     try {
       await api.notifications.markRead(id);
     } catch {
-      setItems((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: 0 } : n)));
+      setItems((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, is_read: 0 } : n))
+      );
     }
   };
 
@@ -187,22 +185,24 @@ export const NotificationsView = ({ onUnreadCountChange }) => {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center">
             <Bell size={18} />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">Notifications</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+              Notifications
+            </h2>
             <p className="text-sm text-slate-500">
               {unreadCount} non lue{unreadCount > 1 ? "s" : ""}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <Button variant="outline" onClick={fetchNotifications} disabled={loading}>
             <RefreshCw size={16} /> Actualiser
           </Button>
@@ -217,10 +217,12 @@ export const NotificationsView = ({ onUnreadCountChange }) => {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
         <button
-          className={`px-4 py-2 rounded-xl border text-sm font-semibold ${
-            tab === "all" ? "bg-slate-900 text-white border-slate-900" : "bg-white text-slate-700"
+          className={`px-4 py-2 rounded-xl border text-sm font-semibold whitespace-nowrap ${
+            tab === "all"
+              ? "bg-slate-900 text-white border-slate-900"
+              : "bg-white text-slate-700"
           }`}
           onClick={() => setTab("all")}
         >
@@ -228,14 +230,14 @@ export const NotificationsView = ({ onUnreadCountChange }) => {
         </button>
 
         <button
-          className={`px-4 py-2 rounded-xl border text-sm font-semibold ${
+          className={`px-4 py-2 rounded-xl border text-sm font-semibold whitespace-nowrap ${
             tab === "unread"
               ? "bg-slate-900 text-white border-slate-900"
               : "bg-white text-slate-700"
           }`}
           onClick={() => setTab("unread")}
         >
-          Non lues{" "}
+          Non lues
           {unreadCount > 0 && (
             <span className="ml-2 inline-flex items-center justify-center text-xs font-bold px-2 py-0.5 rounded-full bg-rose-600 text-white">
               {unreadCount}
@@ -246,7 +248,9 @@ export const NotificationsView = ({ onUnreadCountChange }) => {
 
       {/* Content */}
       {loading ? (
-        <div className="rounded-2xl border p-10 text-center text-slate-600">Chargement...</div>
+        <div className="rounded-2xl border p-10 text-center text-slate-600">
+          Chargement...
+        </div>
       ) : error ? (
         <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-rose-800">
           <div className="font-semibold mb-1">Erreur de chargement</div>
@@ -265,21 +269,26 @@ export const NotificationsView = ({ onUnreadCountChange }) => {
             return (
               <div
                 key={n.id}
-                className={`border rounded-2xl p-4 bg-white flex items-start justify-between gap-4 ${
-                  !isRead(n.is_read) ? "border-slate-300" : "border-slate-200"
+                className={`border rounded-2xl p-4 bg-white flex flex-col gap-4 md:flex-row md:items-start md:justify-between ${
+                  !isRead(n.is_read)
+                    ? "border-slate-300"
+                    : "border-slate-200"
                 }`}
               >
+                {/* Left content */}
                 <div className="flex items-start gap-3">
                   <div
                     className={`h-10 w-10 rounded-2xl border flex items-center justify-center ${TYPE_META[t].badge}`}
-                    title={t}
                   >
                     <Icon size={18} />
                   </div>
 
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-bold text-slate-900 truncate">{getTitle(n)}</p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-bold text-slate-900 break-words">
+                        {getTitle(n)}
+                      </p>
+
                       {!isRead(n.is_read) && (
                         <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-rose-600 text-white">
                           Non lue
@@ -288,23 +297,31 @@ export const NotificationsView = ({ onUnreadCountChange }) => {
                     </div>
 
                     {n.event_key && (
-                      <p className="text-xs text-slate-500 mt-0.5">{getEventLabel(n)}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        {getEventLabel(n)}
+                      </p>
                     )}
 
-                    <p className="text-xs text-slate-500 mt-1">{fmtDateTime(n.created_at)}</p>
+                    <p className="text-xs text-slate-500 mt-1">
+                      {fmtDateTime(n.created_at)}
+                    </p>
 
                     {n.content && (
-                      <p className="text-sm text-slate-700 mt-2 whitespace-pre-wrap">{n.content}</p>
+                      <p className="text-sm text-slate-700 mt-2 whitespace-pre-wrap break-words">
+                        {n.content}
+                      </p>
                     )}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
+                {/* Actions */}
+                <div className="flex flex-wrap gap-2 md:shrink-0">
                   {hasAction(n) && (
                     <Button variant="outline" onClick={() => openAction(n)}>
                       <ExternalLink size={16} /> Voir
                     </Button>
                   )}
+
                   {!isRead(n.is_read) && (
                     <Button variant="outline" onClick={() => markOneRead(n.id)}>
                       <CheckCheck size={16} /> Lu
