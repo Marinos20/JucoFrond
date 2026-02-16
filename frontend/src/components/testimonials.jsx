@@ -31,7 +31,7 @@ const testimonials = [
   {
     id: 2,
     quote:
-      "Toutes les transactions sont sécurisées, automatiquement enregistrées et accessibles, ce qui facilite la conformité et la redevabilité.",
+      "Ce que j’apprécie le plus, c’est la transparence : les paiements sont protégés, les informations sont centralisées, et l’ensemble des opérations reste accessible et vérifiable. Cela renforce la confiance entre bénéficiaires, partenaires et équipes de gestion, tout en facilitant le suivi administratif et la production de preuves en cas d’audit.",
     name: "Maximilian Muller",
     role: "Bénéficiaire",
     avatar: maximilianAvatar,
