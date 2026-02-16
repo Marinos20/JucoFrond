@@ -63,9 +63,13 @@ export const Hero = ({ onSubmitProjectClick }) => {
             <ArrowRight className="w-4 h-4" />
           </a>
 
-          <button className="h-12 px-8 rounded-full cursor-pointer text-slate-900 bg-slate-100 font-medium text-base hover:bg-slate-200 transition-all hover:scale-105 active:scale-95 duration-200">
-            En savoir plus
-          </button>
+          <a
+  href="#features"
+  className="h-12 px-8 rounded-full cursor-pointer text-slate-900 bg-slate-100 font-medium text-base hover:bg-slate-200 transition-all hover:scale-105 active:scale-95 duration-200 inline-flex items-center justify-center"
+>
+  En savoir plus
+</a>
+
         </div>
       </div>
     </section>
