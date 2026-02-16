@@ -39,7 +39,7 @@ const testimonials = [
   {
     id: 3,
     quote:
-      "Rejeté par la banque et totalement désespéré, je me suis tourné vers DIRECT FINANCEMENT qui m'a octrouyé le financement dont j'ai besoin pour sauver ma structure en un temps record. Et le plus étonnant c'est que c'est non remboursable. Merci à toute l'équipe de DIRECT FINANCEMENT.",
+      "Suite au refus de la banque, j’étais au bord de la fermeture. Sur eurofinancement, j’ai été guidé pas à pas pour présenter mon projet correctement. La réponse a été rapide, et les versements sont sécurisés et documentés. Aujourd’hui, mon activité est relancée et je peux à nouveau me projeter.",
     name: "Piotr Kowalski",
     role: "Bénéficiaire",
     avatar: piotrAvatar,
