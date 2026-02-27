@@ -1,3 +1,8 @@
+// ✅ src/App.jsx (UPDATED - PUBLIC SUBMISSION MODAL + REAL offerId)
+// - ouvre le modal sans connexion
+// - récupère l'offre "active" depuis l'API public (1ère offre publiée si dispo)
+// - passe offerId réel au modal (au lieu de "1")
+
 import React, { useEffect, useMemo, useState } from "react";
 import { Header } from "./components/header";
 import { Hero } from "./components/hero";
@@ -18,7 +23,7 @@ import { ContactPage } from "./components/contactPage";
 import { NotFound } from "./components/NotFound";
 import VerifyParentEmail from "./components/pages/VerifyParentEmail";
 
-import { PublicSubmissionModal } from "./components/PublicSubmissionModal"; // ✅ AJOUT
+import { PublicSubmissionModal } from "./components/PublicSubmissionModal";
 import { api } from "./services/api";
 
 const App = () => {
@@ -27,8 +32,13 @@ const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [profileStatus, setProfileStatus] = useState(null);
 
-  // ✅ Modal public: soumission sans connexion
+  // ✅ Modal public
   const [openSubmit, setOpenSubmit] = useState(false);
+
+  // ✅ Offre "active" pour la soumission publique
+  const [activeOffer, setActiveOffer] = useState(null);
+  const [offerLoading, setOfferLoading] = useState(false);
+  const [offerError, setOfferError] = useState(null);
 
   const dashboardRole = useMemo(() => currentUser?.role || null, [currentUser]);
 
@@ -60,6 +70,39 @@ const App = () => {
     const token = path.split("/verify-parent-email/")[1];
     return <VerifyParentEmail token={token} />;
   }
+
+  /* =========================
+     FETCH OFFERS (PUBLIC) -> pick active offer
+     ⚠️ suppose que l'endpoint GET /api/offers est public (tu l'as mis à jour)
+  ========================= */
+  useEffect(() => {
+    const fetchActiveOffer = async () => {
+      setOfferLoading(true);
+      setOfferError(null);
+
+      try {
+        const res = await api.public.getOffers();
+        const list = Array.isArray(res?.data) ? res.data : [];
+
+        // Priorité: status === "published" sinon première offre
+        const published = list.find(
+          (o) => String(o?.status || "").toLowerCase() === "published"
+        );
+
+        setActiveOffer(published || list[0] || null);
+      } catch (err) {
+        console.error("Fetch offers error:", err);
+        setOfferError(err?.message || "Impossible de charger les offres");
+        setActiveOffer(null);
+      } finally {
+        setOfferLoading(false);
+      }
+    };
+
+    // seulement quand on est sur landing (public)
+    if (!dashboardRole) fetchActiveOffer();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dashboardRole]);
 
   /* =========================
      CHECK PARENT PROFILE STATUS
@@ -96,10 +139,20 @@ const App = () => {
 
   /* =========================
      HERO CTA HANDLER (PUBLIC)
-     ✅ OUVRE LE MODAL SANS CONNEXION
   ========================= */
   const handleSubmitProjectClick = () => {
     console.log("App: Hero submit click (PUBLIC)");
+
+    if (offerLoading) {
+      alert("Chargement des offres... réessaie dans 2 secondes.");
+      return;
+    }
+
+    if (!activeOffer?.id) {
+      alert(offerError || "Aucune offre disponible pour le moment.");
+      return;
+    }
+
     setOpenSubmit(true);
   };
 
@@ -136,7 +189,9 @@ const App = () => {
       );
     }
 
-    return <ProjectSubmissionDashboard user={currentUser} onLogout={handleLogout} />;
+    return (
+      <ProjectSubmissionDashboard user={currentUser} onLogout={handleLogout} />
+    );
   }
 
   /* =========================
@@ -154,15 +209,14 @@ const App = () => {
       <Header scrolled={scrolled} onLoginClick={() => setView("landing")} />
 
       <main>
-        {/* ✅ IMPORTANT : soumission sans connexion */}
         <Hero onSubmitProjectClick={handleSubmitProjectClick} />
 
         {/* ✅ MODAL PUBLIC */}
         <PublicSubmissionModal
           open={openSubmit}
           onClose={() => setOpenSubmit(false)}
-          offerId={"1"} // ⚠️ remplace par un vrai offerId (offre active)
-          offerTitle={"Financement Pro"}
+          offerId={activeOffer?.id}
+          offerTitle={activeOffer?.title || "Soumission"}
         />
 
         <Features id="features" />

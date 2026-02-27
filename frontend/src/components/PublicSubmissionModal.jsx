@@ -1,9 +1,15 @@
+// 📌 src/components/PublicSubmissionModal.jsx (UPDATED + PATH FIXES)
 import React, { useEffect, useState } from "react";
 import { X, Loader2, Send } from "lucide-react";
-import { Button } from "./ui/button";      // ✅ FIX: ui est dans src/components/ui
-import { api } from "../services/api";     // ✅ FIX: services est dans src/services
+import { Button } from "./ui/button"; // ✅ ui est dans src/components/ui
+import { api } from "../services/api"; // ✅ services est dans src/services
 
-export const PublicSubmissionModal = ({ open, onClose, offerId, offerTitle }) => {
+export const PublicSubmissionModal = ({
+  open,
+  onClose,
+  offerId,
+  offerTitle,
+}) => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
