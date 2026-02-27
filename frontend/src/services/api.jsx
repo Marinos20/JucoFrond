@@ -1,5 +1,5 @@
 // =====================================================
-// 📜 services/api.js (PRODUCTION READY — FINAL)
+// 📜 services/api.js (PRODUCTION READY — FINAL + PUBLIC SUBMISSION)
 // =====================================================
 
 /* =========================
@@ -17,13 +17,11 @@ const BASE_URL = (() => {
     return "http://127.0.0.1:3000/api";
   }
 
-  throw new Error(
-    "❌ VITE_API_URL manquant en production. Vérifie .env.production"
-  );
+  throw new Error("❌ VITE_API_URL manquant en production. Vérifie .env.production");
 })();
 
 /* =========================
-   🔐 HEADERS AVEC TOKEN
+   🔐 HEADERS AVEC TOKEN (AUTH)
 ========================= */
 const getHeaders = (isFormData = false) => {
   const token = localStorage.getItem("token");
@@ -40,7 +38,7 @@ const getHeaders = (isFormData = false) => {
 };
 
 /* =========================
-   🌐 FETCH CENTRALISÉ
+   🌐 FETCH CENTRALISÉ (AUTH)
 ========================= */
 const handleFetch = async (url, options = {}, isFormData = false) => {
   let res;
@@ -81,61 +79,110 @@ const handleFetch = async (url, options = {}, isFormData = false) => {
 };
 
 /* =========================
+   🌐 FETCH CENTRALISÉ (PUBLIC - SANS TOKEN)
+   - Ne met PAS Authorization
+   - N’efface PAS le token sur 401 (car route publique)
+========================= */
+const handlePublicFetch = async (url, options = {}) => {
+  let res;
+
+  try {
+    res = await fetch(url, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers || {}),
+      },
+    });
+  } catch {
+    throw new Error("Le serveur est hors ligne.");
+  }
+
+  const contentType = res.headers.get("content-type") || "";
+  const isJson = contentType.includes("application/json");
+
+  if (!res.ok) {
+    let message = "Erreur API";
+
+    if (isJson) {
+      const err = await res.json().catch(() => ({}));
+      message = err?.message || err?.error || message;
+    }
+
+    throw new Error(message);
+  }
+
+  return isJson ? res.json() : null;
+};
+
+/* =========================
    📦 API EXPORT
 ========================= */
 export const api = {
+  /* ================= PUBLIC (SANS AUTH) ================= */
+  public: {
+    // Liste des offres (public)
+    getOffers: () => handlePublicFetch(`${BASE_URL}/offers`, { method: "GET" }),
+
+    // Détails offre (public)
+    getOffer: (id) => handlePublicFetch(`${BASE_URL}/offers/${id}`, { method: "GET" }),
+
+    /**
+     * Soumission publique d’un projet (sans token)
+     * Route à créer côté backend :
+     * POST /offers/:offerId/public-submissions
+     */
+    submitOffer: (offerId, data) =>
+      handlePublicFetch(`${BASE_URL}/offers/${offerId}/public-submissions`, {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+  },
+
   /* ================= AUTH ================= */
-auth: {
-  login: async (credentials) => {
-    const res = await handleFetch(`${BASE_URL}/auth/login`, {
-      method: "POST",
-      body: JSON.stringify(credentials),
-    });
+  auth: {
+    login: async (credentials) => {
+      const res = await handleFetch(`${BASE_URL}/auth/login`, {
+        method: "POST",
+        body: JSON.stringify(credentials),
+      });
 
-    if (res?.token) localStorage.setItem("token", res.token);
-    if (res?.user) localStorage.setItem("user", JSON.stringify(res.user));
+      if (res?.token) localStorage.setItem("token", res.token);
+      if (res?.user) localStorage.setItem("user", JSON.stringify(res.user));
 
-    return res;
+      return res;
+    },
+
+    registerParent: (data) =>
+      handleFetch(`${BASE_URL}/auth/register-parent`, {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+
+    resendVerification: (email) =>
+      handleFetch(`${BASE_URL}/auth/resend-verification`, {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      }),
+
+    verifyParentEmail: (token) =>
+      handleFetch(`${BASE_URL}/auth/verify-parent-email/${token}`),
+
+    logout: () => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+    },
   },
-
-  registerParent: (data) =>
-    handleFetch(`${BASE_URL}/auth/register-parent`, {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
-
-  resendVerification: (email) =>
-    handleFetch(`${BASE_URL}/auth/resend-verification`, {
-      method: "POST",
-      body: JSON.stringify({ email }),
-    }),
-
-  /* ✅ AJOUT ICI */
-  verifyParentEmail: (token) =>
-    handleFetch(`${BASE_URL}/auth/verify-parent-email/${token}`),
-
-  logout: () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-  },
-},
-
 
   /* ================= PARENT ================= */
   parent: {
     updateProfile: (formData) =>
-      handleFetch(
-        `${BASE_URL}/parent/profile`,
-        { method: "PUT", body: formData },
-        true
-      ),
+      handleFetch(`${BASE_URL}/parent/profile`, { method: "PUT", body: formData }, true),
 
-    getProfile: () =>
-      handleFetch(`${BASE_URL}/parent/profile`),
+    getProfile: () => handleFetch(`${BASE_URL}/parent/profile`),
 
     profile: {
-      get: () =>
-        handleFetch(`${BASE_URL}/parent/profile`),
+      get: () => handleFetch(`${BASE_URL}/parent/profile`),
 
       upsert: (data) =>
         handleFetch(`${BASE_URL}/parent/profile`, {
@@ -143,13 +190,11 @@ auth: {
           body: JSON.stringify(data),
         }),
 
-      status: () =>
-        handleFetch(`${BASE_URL}/parent/profile/status`),
+      status: () => handleFetch(`${BASE_URL}/parent/profile/status`),
     },
 
     account: {
-      get: () =>
-        handleFetch(`${BASE_URL}/parent/account`),
+      get: () => handleFetch(`${BASE_URL}/parent/account`),
 
       update: (data) =>
         handleFetch(`${BASE_URL}/parent/account`, {
@@ -171,18 +216,12 @@ auth: {
 
   /* ================= PROJECTS ================= */
   projects: {
-    getMyProjects: () =>
-      handleFetch(`${BASE_URL}/projects`),
+    getMyProjects: () => handleFetch(`${BASE_URL}/projects`),
 
-    getByUser: () =>
-      handleFetch(`${BASE_URL}/projects`),
+    getByUser: () => handleFetch(`${BASE_URL}/projects`),
 
     create: (formData) =>
-      handleFetch(
-        `${BASE_URL}/projects`,
-        { method: "POST", body: formData },
-        true
-      ),
+      handleFetch(`${BASE_URL}/projects`, { method: "POST", body: formData }, true),
 
     uploadFile: (projectId, fileUrl) =>
       handleFetch(`${BASE_URL}/projects/${projectId}/file`, {
@@ -193,11 +232,9 @@ auth: {
 
   /* ================= OFFERS ================= */
   offers: {
-    getAll: () =>
-      handleFetch(`${BASE_URL}/offers`),
+    getAll: () => handleFetch(`${BASE_URL}/offers`),
 
-    getOne: (id) =>
-      handleFetch(`${BASE_URL}/offers/${id}`),
+    getOne: (id) => handleFetch(`${BASE_URL}/offers/${id}`),
 
     submit: (offerId, projectId) =>
       handleFetch(`${BASE_URL}/offers/${offerId}/submit`, {
@@ -211,8 +248,7 @@ auth: {
         body: JSON.stringify(data),
       }),
 
-    getSubmissions: (offerId) =>
-      handleFetch(`${BASE_URL}/offers/${offerId}/submissions`),
+    getSubmissions: (offerId) => handleFetch(`${BASE_URL}/offers/${offerId}/submissions`),
 
     update: (offerId, data) =>
       handleFetch(`${BASE_URL}/offers/${offerId}`, {
@@ -223,8 +259,7 @@ auth: {
 
   /* ================= ACADEMIC ================= */
   academic: {
-    getYears: (schoolId) =>
-      handleFetch(`${BASE_URL}/academic/years/${schoolId}`),
+    getYears: (schoolId) => handleFetch(`${BASE_URL}/academic/years/${schoolId}`),
 
     createYear: (data) =>
       handleFetch(`${BASE_URL}/academic/years`, {
@@ -238,17 +273,14 @@ auth: {
         body: JSON.stringify({ school_id: schoolId }),
       }),
 
-    getClasses: (yearId) =>
-      handleFetch(`${BASE_URL}/academic/classes/${yearId}`),
+    getClasses: (yearId) => handleFetch(`${BASE_URL}/academic/classes/${yearId}`),
   },
 
   /* ================= NOTIFICATIONS ================= */
   notifications: {
-    getMy: () =>
-      handleFetch(`${BASE_URL}/notifications`),
+    getMy: () => handleFetch(`${BASE_URL}/notifications`),
 
-    getAll: () =>
-      handleFetch(`${BASE_URL}/notifications`),
+    getAll: () => handleFetch(`${BASE_URL}/notifications`),
 
     broadcast: (data) =>
       handleFetch(`${BASE_URL}/notifications/broadcast`, {
@@ -276,20 +308,17 @@ auth: {
   /* ================= SUPER ADMIN ================= */
   superAdmin: {
     stats: {
-      get: () =>
-        handleFetch(`${BASE_URL}/super-admin/stats`),
+      get: () => handleFetch(`${BASE_URL}/super-admin/stats`),
     },
 
     projects: {
-      getAll: () =>
-        handleFetch(`${BASE_URL}/super-admin/projects`),
+      getAll: () => handleFetch(`${BASE_URL}/super-admin/projects`),
     },
   },
 
   /* ================= ADMIN ================= */
   admin: {
-    getParents: () =>
-      handleFetch(`${BASE_URL}/admin/parents`),
+    getParents: () => handleFetch(`${BASE_URL}/admin/parents`),
 
     resendVerificationEmail: (email) =>
       handleFetch(`${BASE_URL}/admin/resend-verification-email`, {
@@ -297,8 +326,7 @@ auth: {
         body: JSON.stringify({ email }),
       }),
 
-    getAllSchools: () =>
-      handleFetch(`${BASE_URL}/admin/schools`),
+    getAllSchools: () => handleFetch(`${BASE_URL}/admin/schools`),
 
     createSchool: (data) =>
       handleFetch(`${BASE_URL}/admin/schools`, {

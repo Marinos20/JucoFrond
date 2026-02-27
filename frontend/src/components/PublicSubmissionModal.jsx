@@ -1,25 +1,32 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { X, Loader2, Send } from "lucide-react";
-import { Button } from "../ui/button";
-import { api } from "../../services/api";
+import { Button } from "./ui/button";      // ✅ FIX: ui est dans src/components/ui
+import { api } from "../services/api";     // ✅ FIX: services est dans src/services
 
-export const PublicSubmissionModal = ({
-  open,
-  onClose,
-  offerId,
-  offerTitle,
-}) => {
+export const PublicSubmissionModal = ({ open, onClose, offerId, offerTitle }) => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const [form, setForm] = useState({
+  const initialForm = {
     first_name: "",
     last_name: "",
     email: "",
     phone: "",
     project_title: "",
     project_description: "",
-  });
+  };
+
+  const [form, setForm] = useState(initialForm);
+
+  // ✅ reset propre quand le modal s'ouvre/ferme
+  useEffect(() => {
+    if (open) {
+      setSuccess(false);
+      setLoading(false);
+      setForm(initialForm);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   if (!open) return null;
 
@@ -27,17 +34,27 @@ export const PublicSubmissionModal = ({
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  const safeClose = () => {
+    if (loading) return; // évite fermeture pendant envoi
+    onClose?.();
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!offerId) {
+      alert("Offre introuvable (offerId manquant).");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await api.public.submitOffer(offerId, form); 
-      // 👉 Tu devras créer cette route dans ton api.js
-
+      await api.public.submitOffer(offerId, form);
       setSuccess(true);
     } catch (err) {
-      alert(err?.message || "Erreur lors de la soumission");
+      const msg = err?.message || "Erreur lors de la soumission";
+      alert(msg);
     } finally {
       setLoading(false);
     }
@@ -48,20 +65,21 @@ export const PublicSubmissionModal = ({
       {/* Overlay */}
       <div
         className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
-        onClick={onClose}
+        onClick={safeClose}
       />
 
       {/* Modal */}
       <div className="relative w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-300">
         {/* Header */}
         <div className="p-6 border-b flex justify-between items-center bg-slate-900 text-white">
-          <h3 className="text-lg md:text-xl font-bold">
-            Soumettre un projet
-          </h3>
+          <h3 className="text-lg md:text-xl font-bold">Soumettre un projet</h3>
 
           <button
-            onClick={onClose}
+            onClick={safeClose}
             className="p-2 hover:bg-white/10 rounded-full"
+            disabled={loading}
+            aria-disabled={loading}
+            title={loading ? "Envoi en cours..." : "Fermer"}
           >
             <X size={20} color="currentColor" />
           </button>
@@ -80,7 +98,7 @@ export const PublicSubmissionModal = ({
               <div className="font-bold mt-2">{offerTitle}</div>
 
               <Button
-                onClick={onClose}
+                onClick={safeClose}
                 className="mt-6 bg-slate-900 text-white rounded-2xl"
               >
                 Fermer
@@ -94,9 +112,7 @@ export const PublicSubmissionModal = ({
                   required
                   placeholder="Prénom"
                   value={form.first_name}
-                  onChange={(e) =>
-                    handleChange("first_name", e.target.value)
-                  }
+                  onChange={(e) => handleChange("first_name", e.target.value)}
                   className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10"
                 />
 
@@ -104,9 +120,7 @@ export const PublicSubmissionModal = ({
                   required
                   placeholder="Nom"
                   value={form.last_name}
-                  onChange={(e) =>
-                    handleChange("last_name", e.target.value)
-                  }
+                  onChange={(e) => handleChange("last_name", e.target.value)}
                   className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10"
                 />
               </div>
@@ -118,18 +132,14 @@ export const PublicSubmissionModal = ({
                   type="email"
                   placeholder="Email"
                   value={form.email}
-                  onChange={(e) =>
-                    handleChange("email", e.target.value)
-                  }
+                  onChange={(e) => handleChange("email", e.target.value)}
                   className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10"
                 />
 
                 <input
                   placeholder="Téléphone"
                   value={form.phone}
-                  onChange={(e) =>
-                    handleChange("phone", e.target.value)
-                  }
+                  onChange={(e) => handleChange("phone", e.target.value)}
                   className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10"
                 />
               </div>
@@ -139,9 +149,7 @@ export const PublicSubmissionModal = ({
                 required
                 placeholder="Titre du projet"
                 value={form.project_title}
-                onChange={(e) =>
-                  handleChange("project_title", e.target.value)
-                }
+                onChange={(e) => handleChange("project_title", e.target.value)}
                 className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-semibold outline-none focus:ring-4 focus:ring-indigo-500/10"
               />
 
@@ -158,14 +166,12 @@ export const PublicSubmissionModal = ({
 
               {/* Submit */}
               <Button
+                type="submit"
                 disabled={loading}
                 className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold hover:bg-black"
               >
                 {loading ? (
-                  <Loader2
-                    className="animate-spin"
-                    color="currentColor"
-                  />
+                  <Loader2 className="animate-spin" color="currentColor" />
                 ) : (
                   <>
                     <Send size={18} className="mr-2" />

@@ -1,14 +1,24 @@
-import React from 'react';
-import { ArrowRight } from 'lucide-react';
-import DotGrid from './ui/DotGrid';
+import React from "react";
+import { ArrowRight } from "lucide-react";
+import DotGrid from "./ui/DotGrid";
 
 export const Hero = ({ onSubmitProjectClick }) => {
-  const whatsappNumber = '34695970359'; // format international sans +
+  const whatsappNumber = "34695970359"; // format international sans +
   const whatsappMessage = encodeURIComponent(
     "Bonjour, je souhaite soumettre un projet pour financement. Pouvez-vous m'indiquer la procédure ?"
   );
 
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
+
+  const handleOpenModal = () => {
+    // ✅ Debug utile (tu peux retirer après)
+    console.log("Hero: click Soumettre un projet");
+    if (typeof onSubmitProjectClick === "function") {
+      onSubmitProjectClick();
+    } else {
+      console.warn("Hero: onSubmitProjectClick non fourni");
+    }
+  };
 
   return (
     <section className="min-h-screen relative z-10 pb-24 md:pt-56 md:pb-32 px-6 bg-white overflow-hidden">
@@ -41,7 +51,8 @@ export const Hero = ({ onSubmitProjectClick }) => {
 
         {/* Title */}
         <h1 className="animate-fade-up delay-100 text-5xl md:text-7xl lg:text-8xl font-semibold tracking-tighter text-slate-900 mb-8 leading-[1.05]">
-          Soutenir les projets à fort impact<br />
+          Soutenir les projets à fort impact
+          <br />
           <span className="text-indigo-600">économique et social.</span>
         </h1>
 
@@ -52,24 +63,33 @@ export const Hero = ({ onSubmitProjectClick }) => {
 
         {/* CTA */}
         <div className="animate-fade-up delay-300 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <a
-            href={whatsappLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={onSubmitProjectClick} // optionnel (tu peux supprimer)
+          {/* ✅ OUVRE LE MODAL */}
+          <button
+            type="button"
+            onClick={handleOpenModal}
             className="h-12 px-8 rounded-full bg-slate-900 cursor-pointer text-white font-medium text-base hover:bg-black transition-all flex items-center gap-2 hover:scale-105 active:scale-95 duration-200 shadow-lg shadow-slate-900/20"
           >
             Soumettre un projet
             <ArrowRight className="w-4 h-4" />
+          </button>
+
+          {/* ✅ WhatsApp (séparé) */}
+          <a
+            href={whatsappLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="h-12 px-8 rounded-full cursor-pointer text-slate-900 bg-slate-100 font-medium text-base hover:bg-slate-200 transition-all hover:scale-105 active:scale-95 duration-200 inline-flex items-center justify-center"
+          >
+            WhatsApp
           </a>
 
+          {/* En savoir plus */}
           <a
-  href="#features"
-  className="h-12 px-8 rounded-full cursor-pointer text-slate-900 bg-slate-100 font-medium text-base hover:bg-slate-200 transition-all hover:scale-105 active:scale-95 duration-200 inline-flex items-center justify-center"
->
-  En savoir plus
-</a>
-
+            href="#features"
+            className="h-12 px-8 rounded-full cursor-pointer text-slate-900 bg-slate-100 font-medium text-base hover:bg-slate-200 transition-all hover:scale-105 active:scale-95 duration-200 inline-flex items-center justify-center"
+          >
+            En savoir plus
+          </a>
         </div>
       </div>
     </section>

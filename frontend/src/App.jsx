@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Header } from "./components/header";
 import { Hero } from "./components/hero";
 import { Footer } from "./components/footer";
-import { LoginModal } from "./components/auth/loginModal";
 
 import { SuperAdminDashboard } from "./components/dashboards/superAdmin/SuperAdminDashboard";
 import { SchoolAdminDashboard } from "./components/dashboards/schoolAdmin/SchoolAdminDashboard";
@@ -13,14 +12,13 @@ import { DashboardLayout } from "./components/layouts/DashboardLayout";
 
 import { Cta } from "./components/cta";
 import { TestimonialsCarousel } from "./components/testimonials";
-
 import { Features } from "./components/features";
 import Faq from "./components/faq";
 import { ContactPage } from "./components/contactPage";
 import { NotFound } from "./components/NotFound";
 import VerifyParentEmail from "./components/pages/VerifyParentEmail";
 
-
+import { PublicSubmissionModal } from "./components/PublicSubmissionModal"; // ✅ AJOUT
 import { api } from "./services/api";
 
 const App = () => {
@@ -29,10 +27,10 @@ const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [profileStatus, setProfileStatus] = useState(null);
 
-  const dashboardRole = useMemo(
-    () => currentUser?.role || null,
-    [currentUser]
-  );
+  // ✅ Modal public: soumission sans connexion
+  const [openSubmit, setOpenSubmit] = useState(false);
+
+  const dashboardRole = useMemo(() => currentUser?.role || null, [currentUser]);
 
   /* =========================
      INIT + RESTORE SESSION
@@ -76,6 +74,8 @@ const App = () => {
           console.error("Profile status error:", err);
           setProfileStatus(false);
         }
+      } else {
+        setProfileStatus(null);
       }
     };
 
@@ -85,12 +85,6 @@ const App = () => {
   /* =========================
      AUTH HANDLERS
   ========================= */
-  const handleLoginSuccess = (user) => {
-    setCurrentUser(user);
-    setView("landing");
-    window.scrollTo(0, 0);
-  };
-
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -101,9 +95,17 @@ const App = () => {
   };
 
   /* =========================
-     ROUTAGE PAR RÔLE
+     HERO CTA HANDLER (PUBLIC)
+     ✅ OUVRE LE MODAL SANS CONNEXION
   ========================= */
+  const handleSubmitProjectClick = () => {
+    console.log("App: Hero submit click (PUBLIC)");
+    setOpenSubmit(true);
+  };
 
+  /* =========================
+     ROUTAGE PAR RÔLE (inchangé)
+  ========================= */
   if (dashboardRole === "super_admin") {
     return <SuperAdminDashboard onLogout={handleLogout} user={currentUser} />;
   }
@@ -129,49 +131,40 @@ const App = () => {
           sidebarItems={[]}
           onLogout={handleLogout}
         >
-          <ProfileCompletionPage
-            onCompleted={() => setProfileStatus(true)}
-          />
+          <ProfileCompletionPage onCompleted={() => setProfileStatus(true)} />
         </DashboardLayout>
       );
     }
 
-    return (
-      <ProjectSubmissionDashboard
-        user={currentUser}
-        onLogout={handleLogout}
-      />
-    );
-  }
-
-  /* =========================
-     LOGIN VIEW
-  ========================= */
-  if (view === "login") {
-    return (
-      <LoginModal
-        onBack={() => setView("landing")}
-        onLoginSuccess={handleLoginSuccess}
-      />
-    );
+    return <ProjectSubmissionDashboard user={currentUser} onLogout={handleLogout} />;
   }
 
   /* =========================
      FALLBACK 404 LOGIQUE
   ========================= */
-  if (!["landing", "login"].includes(view)) {
+  if (!["landing"].includes(view)) {
     return <NotFound onBack={() => setView("landing")} />;
   }
 
   /* =========================
-     LANDING PAGE
+     LANDING PAGE (PUBLIC)
   ========================= */
   return (
     <div className="min-h-screen bg-white text-slate-950 font-sans selection:bg-slate-900 selection:text-white">
-      <Header scrolled={scrolled} onLoginClick={() => setView("login")} />
+      <Header scrolled={scrolled} onLoginClick={() => setView("landing")} />
 
       <main>
-        <Hero onLoginClick={() => setView("login")} />
+        {/* ✅ IMPORTANT : soumission sans connexion */}
+        <Hero onSubmitProjectClick={handleSubmitProjectClick} />
+
+        {/* ✅ MODAL PUBLIC */}
+        <PublicSubmissionModal
+          open={openSubmit}
+          onClose={() => setOpenSubmit(false)}
+          offerId={"1"} // ⚠️ remplace par un vrai offerId (offre active)
+          offerTitle={"Financement Pro"}
+        />
+
         <Features id="features" />
         <TestimonialsCarousel />
         <Faq />
