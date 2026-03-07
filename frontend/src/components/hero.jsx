@@ -69,7 +69,7 @@ export const Hero = ({ onSubmitProjectClick }) => {
             onClick={handleOpenModal}
             className="h-12 px-8 rounded-full bg-slate-900 cursor-pointer text-white font-medium text-base hover:bg-black transition-all flex items-center gap-2 hover:scale-105 active:scale-95 duration-200 shadow-lg shadow-slate-900/20"
           >
-            Soumettre un projet
+            Un projet?
             <ArrowRight className="w-4 h-4" />
           </button>
 
@@ -80,7 +80,7 @@ export const Hero = ({ onSubmitProjectClick }) => {
             rel="noopener noreferrer"
             className="h-12 px-8 rounded-full cursor-pointer text-slate-900 bg-slate-100 font-medium text-base hover:bg-slate-200 transition-all hover:scale-105 active:scale-95 duration-200 inline-flex items-center justify-center"
           >
-            WhatsApp
+            Soumettre un projet
           </a>
 
           {/* En savoir plus */}
