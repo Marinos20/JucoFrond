@@ -64,14 +64,14 @@ export const Hero = ({ onSubmitProjectClick }) => {
         {/* CTA */}
         <div className="animate-fade-up delay-300 flex flex-col sm:flex-row items-center justify-center gap-4">
           {/* ✅ OUVRE LE MODAL */}
-          <button
+          {/* <button
             type="button"
             onClick={handleOpenModal}
             className="h-12 px-8 rounded-full bg-slate-900 cursor-pointer text-white font-medium text-base hover:bg-black transition-all flex items-center gap-2 hover:scale-105 active:scale-95 duration-200 shadow-lg shadow-slate-900/20"
           >
             Un projet?
             <ArrowRight className="w-4 h-4" />
-          </button>
+          </button> */}
 
           {/* ✅ WhatsApp (séparé) */}
           <a
