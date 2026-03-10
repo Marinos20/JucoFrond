@@ -74,14 +74,14 @@ export const Hero = ({ onSubmitProjectClick }) => {
           </button> */}
 
           {/* ✅ WhatsApp (séparé) */}
-          <a
-            href={whatsappLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="h-12 px-8 rounded-full cursor-pointer text-slate-900 bg-slate-100 font-medium text-base hover:bg-slate-200 transition-all hover:scale-105 active:scale-95 duration-200 inline-flex items-center justify-center"
-          >
-            Soumettre un projet
-          </a>
+<a
+  href={whatsappLink}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="h-12 px-8 rounded-full cursor-pointer text-white bg-black font-medium text-base hover:bg-gray-800 transition-all hover:scale-105 active:scale-95 duration-200 inline-flex items-center justify-center"
+>
+  Soumettre un projet
+</a>
 
           {/* En savoir plus */}
           <a
