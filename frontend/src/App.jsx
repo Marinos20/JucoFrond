@@ -3,6 +3,7 @@
 // - soumission publique sans connexion
 // - récupération offre active
 // - routing dashboard par rôle
+// - redirection automatique après login
 
 import React, { useEffect, useMemo, useState } from "react";
 import { Header } from "./components/header";
@@ -30,19 +31,20 @@ import { LoginModal } from "./components/auth/loginModal";
 import { api } from "./services/api";
 
 const App = () => {
+
   const [scrolled, setScrolled] = useState(false);
   const [view, setView] = useState("landing");
 
   const [currentUser, setCurrentUser] = useState(null);
   const [profileStatus, setProfileStatus] = useState(null);
 
-  // ✅ modal soumission publique
+  // modal soumission publique
   const [openSubmit, setOpenSubmit] = useState(false);
 
-  // ✅ modal login
+  // modal login
   const [openLogin, setOpenLogin] = useState(false);
 
-  // ✅ offre active
+  // offre active
   const [activeOffer, setActiveOffer] = useState(null);
   const [offerLoading, setOfferLoading] = useState(false);
   const [offerError, setOfferError] = useState(null);
@@ -53,6 +55,7 @@ const App = () => {
      INIT + RESTORE SESSION
   ========================= */
   useEffect(() => {
+
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
 
@@ -67,7 +70,20 @@ const App = () => {
     }
 
     return () => window.removeEventListener("scroll", handleScroll);
+
   }, []);
+
+  /* =========================
+     LOGIN SUCCESS
+  ========================= */
+  const handleLoginSuccess = (user) => {
+
+    localStorage.setItem("user", JSON.stringify(user));
+
+    setCurrentUser(user);
+    setOpenLogin(false);
+
+  };
 
   /* =========================
      VERIFY EMAIL PAGE
@@ -83,11 +99,14 @@ const App = () => {
      FETCH PUBLIC OFFERS
   ========================= */
   useEffect(() => {
+
     const fetchActiveOffer = async () => {
+
       setOfferLoading(true);
       setOfferError(null);
 
       try {
+
         const res = await api.public.getOffers();
 
         const list = Array.isArray(res?.data) ? res.data : [];
@@ -97,43 +116,63 @@ const App = () => {
         );
 
         setActiveOffer(published || list[0] || null);
+
       } catch (err) {
+
         console.error("Fetch offers error:", err);
         setOfferError(err?.message || "Impossible de charger les offres");
         setActiveOffer(null);
+
       } finally {
+
         setOfferLoading(false);
+
       }
+
     };
 
     if (!dashboardRole) fetchActiveOffer();
+
   }, [dashboardRole]);
 
   /* =========================
      CHECK PARENT PROFILE
   ========================= */
   useEffect(() => {
+
     const fetchProfileStatus = async () => {
+
       if (currentUser?.role === "parent") {
+
         try {
+
           const res = await api.parent.profile.status();
           setProfileStatus(Boolean(res?.profile_completed));
+
         } catch (err) {
+
           console.error("Profile status error:", err);
           setProfileStatus(false);
+
         }
+
       } else {
+
         setProfileStatus(null);
+
       }
+
     };
 
     fetchProfileStatus();
+
   }, [currentUser]);
 
   /* =========================
      LOGOUT
   ========================= */
   const handleLogout = () => {
+
     localStorage.removeItem("token");
     localStorage.removeItem("user");
 
@@ -142,13 +181,13 @@ const App = () => {
     setView("landing");
 
     window.scrollTo(0, 0);
+
   };
 
   /* =========================
      HERO CTA CLICK
   ========================= */
   const handleSubmitProjectClick = () => {
-    console.log("Hero click public submission");
 
     if (offerLoading) {
       alert("Chargement des offres... réessaie dans quelques secondes.");
@@ -161,6 +200,7 @@ const App = () => {
     }
 
     setOpenSubmit(true);
+
   };
 
   /* =========================
@@ -168,23 +208,41 @@ const App = () => {
   ========================= */
 
   if (dashboardRole === "super_admin") {
-    return <SuperAdminDashboard onLogout={handleLogout} user={currentUser} />;
+
+    return (
+      <SuperAdminDashboard
+        onLogout={handleLogout}
+        user={currentUser}
+      />
+    );
+
   }
 
   if (dashboardRole === "school_admin") {
-    return <SchoolAdminDashboard onLogout={handleLogout} user={currentUser} />;
+
+    return (
+      <SchoolAdminDashboard
+        onLogout={handleLogout}
+        user={currentUser}
+      />
+    );
+
   }
 
   if (dashboardRole === "parent") {
+
     if (profileStatus === null) {
+
       return (
         <div className="h-screen flex items-center justify-center">
           <span className="text-slate-600">Chargement du profil...</span>
         </div>
       );
+
     }
 
     if (profileStatus === false) {
+
       return (
         <DashboardLayout
           userInitial={currentUser?.first_name?.[0] || "P"}
@@ -197,6 +255,7 @@ const App = () => {
           />
         </DashboardLayout>
       );
+
     }
 
     return (
@@ -205,11 +264,13 @@ const App = () => {
         onLogout={handleLogout}
       />
     );
+
   }
 
   /* =========================
      FALLBACK
   ========================= */
+
   if (!["landing"].includes(view)) {
     return <NotFound onBack={() => setView("landing")} />;
   }
@@ -219,6 +280,7 @@ const App = () => {
   ========================= */
 
   return (
+
     <div className="min-h-screen bg-white text-slate-950 font-sans selection:bg-slate-900 selection:text-white">
 
       {/* HEADER */}
@@ -243,6 +305,7 @@ const App = () => {
         <LoginModal
           open={openLogin}
           onClose={() => setOpenLogin(false)}
+          onLoginSuccess={handleLoginSuccess}
         />
 
         <Features id="features" />
@@ -256,7 +319,9 @@ const App = () => {
       <Footer />
 
     </div>
+
   );
+
 };
 
 export default App;
