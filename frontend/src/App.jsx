@@ -1,7 +1,8 @@
-// ✅ src/App.jsx (UPDATED - PUBLIC SUBMISSION MODAL + REAL offerId)
-// - ouvre le modal sans connexion
-// - récupère l'offre "active" depuis l'API public (1ère offre publiée si dispo)
-// - passe offerId réel au modal (au lieu de "1")
+// ✅ src/App.jsx
+// - ouverture modal login
+// - soumission publique sans connexion
+// - récupération offre active
+// - routing dashboard par rôle
 
 import React, { useEffect, useMemo, useState } from "react";
 import { Header } from "./components/header";
@@ -24,18 +25,24 @@ import { NotFound } from "./components/NotFound";
 import VerifyParentEmail from "./components/pages/VerifyParentEmail";
 
 import { PublicSubmissionModal } from "./components/PublicSubmissionModal";
+import { LoginModal } from "./components/auth/loginModal";
+
 import { api } from "./services/api";
 
 const App = () => {
   const [scrolled, setScrolled] = useState(false);
   const [view, setView] = useState("landing");
+
   const [currentUser, setCurrentUser] = useState(null);
   const [profileStatus, setProfileStatus] = useState(null);
 
-  // ✅ Modal public
+  // ✅ modal soumission publique
   const [openSubmit, setOpenSubmit] = useState(false);
 
-  // ✅ Offre "active" pour la soumission publique
+  // ✅ modal login
+  const [openLogin, setOpenLogin] = useState(false);
+
+  // ✅ offre active
   const [activeOffer, setActiveOffer] = useState(null);
   const [offerLoading, setOfferLoading] = useState(false);
   const [offerError, setOfferError] = useState(null);
@@ -50,6 +57,7 @@ const App = () => {
     window.addEventListener("scroll", handleScroll);
 
     const storedUser = localStorage.getItem("user");
+
     if (storedUser) {
       try {
         setCurrentUser(JSON.parse(storedUser));
@@ -62,7 +70,7 @@ const App = () => {
   }, []);
 
   /* =========================
-     CHECK URL POUR VERIFY EMAIL
+     VERIFY EMAIL PAGE
   ========================= */
   const path = window.location.pathname;
 
@@ -72,8 +80,7 @@ const App = () => {
   }
 
   /* =========================
-     FETCH OFFERS (PUBLIC) -> pick active offer
-     ⚠️ suppose que l'endpoint GET /api/offers est public (tu l'as mis à jour)
+     FETCH PUBLIC OFFERS
   ========================= */
   useEffect(() => {
     const fetchActiveOffer = async () => {
@@ -82,9 +89,9 @@ const App = () => {
 
       try {
         const res = await api.public.getOffers();
+
         const list = Array.isArray(res?.data) ? res.data : [];
 
-        // Priorité: status === "published" sinon première offre
         const published = list.find(
           (o) => String(o?.status || "").toLowerCase() === "published"
         );
@@ -99,13 +106,11 @@ const App = () => {
       }
     };
 
-    // seulement quand on est sur landing (public)
     if (!dashboardRole) fetchActiveOffer();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dashboardRole]);
 
   /* =========================
-     CHECK PARENT PROFILE STATUS
+     CHECK PARENT PROFILE
   ========================= */
   useEffect(() => {
     const fetchProfileStatus = async () => {
@@ -126,25 +131,27 @@ const App = () => {
   }, [currentUser]);
 
   /* =========================
-     AUTH HANDLERS
+     LOGOUT
   ========================= */
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+
     setCurrentUser(null);
     setProfileStatus(null);
     setView("landing");
+
     window.scrollTo(0, 0);
   };
 
   /* =========================
-     HERO CTA HANDLER (PUBLIC)
+     HERO CTA CLICK
   ========================= */
   const handleSubmitProjectClick = () => {
-    console.log("App: Hero submit click (PUBLIC)");
+    console.log("Hero click public submission");
 
     if (offerLoading) {
-      alert("Chargement des offres... réessaie dans 2 secondes.");
+      alert("Chargement des offres... réessaie dans quelques secondes.");
       return;
     }
 
@@ -157,8 +164,9 @@ const App = () => {
   };
 
   /* =========================
-     ROUTAGE PAR RÔLE (inchangé)
+     ROUTING DASHBOARD
   ========================= */
+
   if (dashboardRole === "super_admin") {
     return <SuperAdminDashboard onLogout={handleLogout} user={currentUser} />;
   }
@@ -184,34 +192,46 @@ const App = () => {
           sidebarItems={[]}
           onLogout={handleLogout}
         >
-          <ProfileCompletionPage onCompleted={() => setProfileStatus(true)} />
+          <ProfileCompletionPage
+            onCompleted={() => setProfileStatus(true)}
+          />
         </DashboardLayout>
       );
     }
 
     return (
-      <ProjectSubmissionDashboard user={currentUser} onLogout={handleLogout} />
+      <ProjectSubmissionDashboard
+        user={currentUser}
+        onLogout={handleLogout}
+      />
     );
   }
 
   /* =========================
-     FALLBACK 404 LOGIQUE
+     FALLBACK
   ========================= */
   if (!["landing"].includes(view)) {
     return <NotFound onBack={() => setView("landing")} />;
   }
 
   /* =========================
-     LANDING PAGE (PUBLIC)
+     LANDING PAGE
   ========================= */
+
   return (
     <div className="min-h-screen bg-white text-slate-950 font-sans selection:bg-slate-900 selection:text-white">
-      <Header scrolled={scrolled} onLoginClick={() => setView("landing")} />
+
+      {/* HEADER */}
+      <Header
+        scrolled={scrolled}
+        onLoginClick={() => setOpenLogin(true)}
+      />
 
       <main>
+
         <Hero onSubmitProjectClick={handleSubmitProjectClick} />
 
-        {/* ✅ MODAL PUBLIC */}
+        {/* MODAL SOUMISSION PUBLIQUE */}
         <PublicSubmissionModal
           open={openSubmit}
           onClose={() => setOpenSubmit(false)}
@@ -219,14 +239,22 @@ const App = () => {
           offerTitle={activeOffer?.title || "Soumission"}
         />
 
+        {/* MODAL LOGIN */}
+        <LoginModal
+          open={openLogin}
+          onClose={() => setOpenLogin(false)}
+        />
+
         <Features id="features" />
         <TestimonialsCarousel />
         <Faq />
+
       </main>
 
       <Cta id="solution" />
       <ContactPage id="contact" />
       <Footer />
+
     </div>
   );
 };
